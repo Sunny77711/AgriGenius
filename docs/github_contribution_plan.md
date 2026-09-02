@@ -54,6 +54,7 @@ Suggested owner: V Mokshagnna Bramha Teja
 Files:
 
 - `kcc_rag_query.py`
+- `rag_pipeline.py`
 - `embedding.py`
 - `qualitative_retrieval_check.py`
 
@@ -61,6 +62,25 @@ Commit message:
 
 ```bash
 git commit -m "Add ChromaDB retrieval and Gemini RAG pipeline"
+```
+
+Recommended backend upgrade commit:
+
+Files:
+
+- `rag_pipeline.py`
+- `kcc_rag_query.py`
+- `evaluate_retrieval.py`
+- `demo_queries.json`
+- `README.md`
+- `docs/project_status.md`
+- `docs/pipeline.md`
+- `docs/github_contribution_plan.md`
+
+Commit message:
+
+```bash
+git commit -m "Add reusable RAG pipeline with source-aware retrieval"
 ```
 
 ### 4. Evaluation And Safety
@@ -112,6 +132,8 @@ Tasks:
 - Add source/citation output.
 - Add stronger prompt template.
 - Add confidence or insufficient-evidence handling.
+- Add crop/query-type metadata filtering.
+- Add duplicate-aware retrieval and MMR-style diversification.
 
 ### Data Quality Branch
 

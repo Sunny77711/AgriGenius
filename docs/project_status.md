@@ -15,7 +15,12 @@ AgriGenius is currently a working local RAG backend prototype over cleaned Kisan
 - Built a persistent ChromaDB collection named `kcc_agri_advisor`.
 - Confirmed the ChromaDB collection contains 347,944 vectors.
 - Selected `l3cube-pune/hindi-sentence-bert-nli` as the embedding model.
-- Implemented a basic RAG pipeline in `kcc_rag_query.py`.
+- Implemented a reusable RAG pipeline in `rag_pipeline.py`.
+- Updated `kcc_rag_query.py` into a CLI wrapper around the reusable pipeline.
+- Added source-returning retrieval outputs for future UI citation/source cards.
+- Added automatic crop/query-type metadata filtering for explicit farmer queries.
+- Added duplicate-aware candidate filtering with MMR-style diversification.
+- Added `evaluate_retrieval.py` and `demo_queries.json` for local retrieval evaluation.
 - Implemented diagnostics for cross-lingual retrieval, non-answer rows, and near-duplicate flooding.
 
 ## Current Verification Results
@@ -28,15 +33,15 @@ AgriGenius is currently a working local RAG backend prototype over cleaned Kisan
   - `google-genai`
 - Local ChromaDB collection loads successfully.
 - Local retrieval works for Hindi and English queries.
-- Hindi retrieval is strong for the checked examples.
-- English retrieval can hit the correct crop, but can also retrieve weak or question-like passages.
-- Near-duplicate flooding is a known issue and should be addressed before final showcase.
+- Retrieval-only CLI smoke test works with `python kcc_rag_query.py --no-llm --top-k 5 --fetch-k 50`.
+- Demo retrieval evaluation works with `python evaluate_retrieval.py --top-k 5 --fetch-k 50`.
+- Current demo evaluation result: crop hit rate@5 = 6/6, category hit rate@5 = 6/6.
+- Near-duplicate flooding is improved through candidate filtering and MMR-style diversification, but should still be monitored.
 
 ## Known Gaps
 
 - No Streamlit or web UI yet.
-- No source/citation display in the user-facing answer.
-- No duplicate-aware retrieval or MMR diversification yet.
+- No finished Streamlit source/citation display yet.
 - No reranking layer yet.
 - No full RAG vs non-RAG evaluation yet.
 - No held-out AgriSci-QA evaluation yet.

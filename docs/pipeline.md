@@ -7,7 +7,8 @@ Farmer query
   -> Language/input handling
   -> Query embedding
   -> ChromaDB retrieval from cleaned KCC corpus
-  -> Candidate filtering and duplicate reduction
+  -> Crop/query-type metadata filtering
+  -> Candidate filtering and MMR-style duplicate reduction
   -> Grounded prompt construction
   -> Gemini LLM answer generation
   -> Same-language farmer response
@@ -48,7 +49,11 @@ These files are intentionally ignored by Git because they are large local artifa
 ```text
 User asks a question in Hindi or English
   -> Encode query with l3cube-pune/hindi-sentence-bert-nli
-  -> Retrieve top-k advisory records from ChromaDB
+  -> Infer crop/query-type filters when the query is explicit
+  -> Retrieve candidate advisory records from ChromaDB
+  -> Remove obvious non-answer rows
+  -> Reduce near-duplicate source flooding
+  -> Select diverse top-k sources
   -> Build context block with KCC answer text and metadata
   -> Send grounded prompt to Gemini
   -> Generate concise practical response
@@ -63,6 +68,7 @@ User asks a question in Hindi or English
 - Vector database: ChromaDB
 - Generation model: Gemini through `google-genai`
 - Retrieval count: top-k retrieval, currently `TOP_K = 5`
+- Candidate fetch count before filtering/diversification, currently `DEFAULT_FETCH_K = 20`
 - Prompt inputs:
   - Farmer query
   - Retrieved KCC answer passages
@@ -91,8 +97,7 @@ Expected behavior:
 
 - Streamlit UI for farmer interaction.
 - Visible source cards showing retrieved KCC passages.
-- MMR or duplicate-aware candidate filtering.
-- Optional metadata filters for crop, region, and query type.
+- Region filters for district/state-aware search.
 - English-Hindi retrieval fusion for stronger cross-lingual retrieval.
 - Cross-encoder reranking.
 - RAG vs non-RAG evaluation.
