@@ -1,0 +1,38 @@
+[
+  {
+    "query": "गेहूं की फसल में सिंचाई कब करनी चाहिए?",
+    "expected_crop": "Wheat",
+    "expected_query_type": "Water Management",
+    "language": "Hindi"
+  },
+  {
+    "query": "धान की फसल में खरपतवार को कैसे नियंत्रित करें?",
+    "expected_crop": "Paddy",
+    "expected_query_type": "Weed Management",
+    "language": "Hindi"
+  },
+  {
+    "query": "How do I control pests in mango trees?",
+    "expected_crop": "Mango",
+    "expected_query_type": "Plant Protection",
+    "language": "English"
+  },
+  {
+    "query": "What fertilizer should I use for sugarcane?",
+    "expected_crop": "Sugarcane",
+    "expected_query_type": "Fertilizer",
+    "language": "English"
+  },
+  {
+    "query": "मूंगफली की फसल में बीज दर क्या है?",
+    "expected_crop": "Groundnut",
+    "expected_query_type": "Seeds",
+    "language": "Hindi"
+  },
+  {
+    "query": "How to manage weeds in onion crop?",
+    "expected_crop": "Onion",
+    "expected_query_type": "Weed Management",
+    "language": "English"
+  }
+]
