@@ -14,6 +14,11 @@ from dataclasses import dataclass
 from difflib import SequenceMatcher
 from typing import Any
 
+from dotenv import load_dotenv
+
+load_dotenv()
+load_dotenv("keys.env")
+
 import chromadb
 import numpy as np
 from google import genai
