@@ -1,0 +1,16 @@
+[theme]
+primaryColor = "#2E7D32"           # Deep green for primary accents (buttons, links, focus)
+backgroundColor = "#F8FAFC"        # Very soft slate-gray/off-white for main background
+secondaryBackgroundColor = "#FFFFFF" # Clean white for sidebars, containers, and widgets
+textColor = "#1F2937"              # Deep slate-gray for text (softer than pure black)
+borderColor = "#E2E8F0"            # Soft border color
+font = "Inter:https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+baseRadius = "8px"                 # Slightly rounded, modern corners
+showWidgetBorder = true
+showSidebarBorder = true
+
+[theme.sidebar]
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F1F5F9"
+textColor = "#334155"
+borderColor = "#E2E8F0"
