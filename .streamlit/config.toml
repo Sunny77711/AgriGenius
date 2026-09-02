@@ -14,3 +14,7 @@ backgroundColor = "#FFFFFF"
 secondaryBackgroundColor = "#F1F5F9"
 textColor = "#334155"
 borderColor = "#E2E8F0"
+
+[server]
+fileWatcherType = "watchdog"
+
