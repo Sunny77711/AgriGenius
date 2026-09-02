@@ -13,14 +13,16 @@ Implemented:
 - Final retrieval corpus with 347,944 cleaned advisory records.
 - ChromaDB vector index with 347,944 vectors.
 - Hindi-aware embedding model: `l3cube-pune/hindi-sentence-bert-nli`.
-- Basic RAG pipeline: ChromaDB retrieval -> grounded Gemini generation.
+- Reusable RAG pipeline: ChromaDB retrieval -> source selection -> grounded Gemini generation.
+- Source-returning retrieval output for future UI citation cards.
+- Automatic crop/query-type metadata filtering for clear farmer queries.
+- Duplicate-aware candidate filtering with MMR-style diversification.
 - Local retrieval diagnostics for cross-lingual retrieval, non-answer rows, and near-duplicate flooding.
 
 Planned / in progress:
 
 - Streamlit-based farmer UI.
-- Visible source/citation display for retrieved KCC passages.
-- Duplicate-aware retrieval or MMR diversification.
+- Streamlit display of retrieved source/citation cards.
 - Reranking and improved English-Hindi retrieval fusion.
 - Evaluation against non-RAG baselines and held-out agricultural QA benchmarks.
 - Voice input/output for low-literacy accessibility.
@@ -38,6 +40,9 @@ Planned / in progress:
 ├── kcc_rag_query.py
 ├── kcc_strip_pii.py
 ├── qualitative_retrieval_check.py
+├── rag_pipeline.py
+├── evaluate_retrieval.py
+├── demo_queries.json
 ├── retrieval_diagnostics.py
 ├── sowing_time_weather_spotcheck.py
 ├── weather_cleanup.py
@@ -94,10 +99,22 @@ Run the built-in test queries:
 python kcc_rag_query.py
 ```
 
+Run retrieval only without calling Gemini:
+
+```bash
+python kcc_rag_query.py --no-llm
+```
+
 Run interactive mode:
 
 ```bash
 python kcc_rag_query.py --interactive
+```
+
+Run local retrieval evaluation:
+
+```bash
+python evaluate_retrieval.py --top-k 5 --fetch-k 50
 ```
 
 ## Dataset Note
