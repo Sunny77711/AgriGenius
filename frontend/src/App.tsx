@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import { AnimatePresence } from 'framer-motion';
 import { LandingPage } from './pages/LandingPage';
 import { ChatPage } from './pages/ChatPage';
+import { AboutPage } from './pages/AboutPage';
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -11,6 +12,7 @@ function AnimatedRoutes() {
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<LandingPage />} />
         <Route path="/chat" element={<ChatPage />} />
+        <Route path="/about" element={<AboutPage />} />
       </Routes>
     </AnimatePresence>
   );

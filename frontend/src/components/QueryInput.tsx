@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Send, Mic } from 'lucide-react';
+import { Send } from 'lucide-react';
 
 interface QueryInputProps {
   onSend: (query: string, language: "auto" | "en" | "hi") => void;
@@ -19,13 +19,13 @@ export function QueryInput({ onSend, disabled }: QueryInputProps) {
   };
 
   return (
-    <div className="absolute bottom-6 left-0 right-0 px-4 pointer-events-none">
+    <div className="p-4 bg-white border-t border-slate-100 z-20">
       <div className="max-w-3xl mx-auto">
-        <form onSubmit={handleSubmit} className="relative group pointer-events-auto">
-          <div className="glass-input overflow-hidden rounded-full p-1 flex items-center">
+        <form onSubmit={handleSubmit} className="relative group">
+          <div className="overflow-hidden rounded-xl border border-slate-300 bg-white focus-within:border-slate-600 focus-within:ring-1 focus-within:ring-slate-600 transition-all flex items-end">
             <textarea
               rows={1}
-              className="block w-full resize-none border-0 bg-transparent py-3 pl-5 pr-4 text-slate-900 placeholder:text-slate-400 focus:ring-0 sm:text-sm sm:leading-6 min-h-[44px] max-h-[120px]"
+              className="block w-full resize-none border-0 bg-transparent py-4 pl-5 pr-4 text-slate-900 placeholder:text-slate-400 focus:ring-0 sm:text-sm sm:leading-6 min-h-[56px] max-h-[120px]"
               placeholder="Ask a farming question..."
               value={query}
               onChange={(e) => {
@@ -43,11 +43,11 @@ export function QueryInput({ onSend, disabled }: QueryInputProps) {
               disabled={disabled}
             />
             
-            <div className="flex items-center space-x-2 pr-1">
+            <div className="flex items-center space-x-2 py-2 pr-2 shrink-0">
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value as any)}
-                className="h-9 px-2 text-xs font-medium bg-slate-100/50 border border-slate-200/50 rounded-full text-slate-600 focus:ring-primary-500 focus:border-primary-500 hover:bg-slate-200/50 transition-colors cursor-pointer"
+                className="h-9 px-2 text-xs font-medium bg-white border border-slate-200 rounded-md text-slate-600 focus:ring-slate-500 focus:border-slate-500 hover:bg-slate-50 transition-colors cursor-pointer"
                 disabled={disabled}
               >
                 <option value="auto">Auto</option>
@@ -56,23 +56,20 @@ export function QueryInput({ onSend, disabled }: QueryInputProps) {
               </select>
               
               <button
-                type="button"
-                title="Voice input coming soon"
-                className="p-2.5 text-slate-400 hover:text-primary-600 hover:bg-primary-50 rounded-full transition-colors cursor-not-allowed"
-              >
-                <Mic className="w-4 h-4" />
-              </button>
-              
-              <button
                 type="submit"
                 disabled={disabled || !query.trim()}
-                className="inline-flex items-center justify-center p-2.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-full hover:shadow-lg hover:shadow-primary-500/30 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
+                className="inline-flex items-center justify-center p-2.5 bg-amber-600 text-white rounded-lg hover:bg-amber-700 focus:outline-none disabled:opacity-50 transition-colors cursor-pointer"
               >
                 <Send className="w-4 h-4 ml-0.5" />
               </button>
             </div>
           </div>
         </form>
+        <div className="text-center mt-3">
+          <p className="text-[10px] text-slate-400">
+            AgriGenius provides farming information based on KCC advisory records. It does not replace professional agricultural extension advice.
+          </p>
+        </div>
       </div>
     </div>
   );
