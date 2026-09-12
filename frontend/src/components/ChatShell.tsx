@@ -26,29 +26,63 @@ export function ChatShell() {
       content: query,
     };
     
-    setMessages(prev => [...prev, userMessage]);
+    const assistantId = (Date.now() + 1).toString();
+    const assistantMessage: Message = {
+      id: assistantId,
+      role: 'assistant',
+      content: '',
+    };
+    
+    setMessages(prev => [...prev, userMessage, assistantMessage]);
     setIsLoading(true);
 
     try {
-      const response = await sendChatMessage({ query, language, top_k: 5 });
+      const { streamChatMessage } = await import('../lib/api');
       
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: response.answer,
-        responseDetails: response,
-      };
-      
-      setMessages(prev => [...prev, assistantMessage]);
+      await streamChatMessage(
+        { query, language, top_k: 5 },
+        (chunk) => {
+          setMessages(prev => 
+            prev.map(msg => 
+              msg.id === assistantId 
+                ? { ...msg, content: msg.content + chunk } 
+                : msg
+            )
+          );
+        },
+        (sources) => {
+          setMessages(prev => 
+            prev.map(msg => 
+              msg.id === assistantId 
+                ? { ...msg, responseDetails: { ...msg.responseDetails, sources, grounded: true, query, answer: msg.content, source_count: sources.length, collection_count: 0 } as any } 
+                : msg
+            )
+          );
+        },
+        (error) => {
+          console.error('Failed to send message:', error);
+          setMessages(prev => 
+            prev.map(msg => 
+              msg.id === assistantId 
+                ? { ...msg, content: 'Sorry, I encountered an error while trying to process your request. Please try again.' } 
+                : msg
+            )
+          );
+          setIsLoading(false);
+        },
+        () => {
+          setIsLoading(false);
+        }
+      );
     } catch (error) {
       console.error('Failed to send message:', error);
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: 'Sorry, I encountered an error while trying to process your request. Please try again.',
-      };
-      setMessages(prev => [...prev, errorMessage]);
-    } finally {
+      setMessages(prev => 
+        prev.map(msg => 
+          msg.id === assistantId 
+            ? { ...msg, content: 'Sorry, I encountered an error while trying to process your request. Please try again.' } 
+            : msg
+        )
+      );
       setIsLoading(false);
     }
   };

@@ -1,8 +1,8 @@
-import type { ChatRequest, ChatResponse, HealthResponse } from './types';
+import type { ChatRequest, ChatResponse, HealthResponse, SourcePassage } from './types';
 import { mockChatResponse1, mockChatResponseHindi, mockHealthResponse } from './mockData';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
-const USE_MOCK = true; // Set to false when backend is ready
+const USE_MOCK = false;
 
 export async function checkHealth(): Promise<HealthResponse> {
   if (USE_MOCK) {
@@ -20,13 +20,12 @@ export async function sendChatMessage(request: ChatRequest): Promise<ChatRespons
   if (USE_MOCK) {
     return new Promise((resolve) => {
       setTimeout(() => {
-        // Simple mock logic based on language hint
         if (request.query.match(/[\u0900-\u097F]/) || request.language === 'hi') {
           resolve(mockChatResponseHindi);
         } else {
           resolve(mockChatResponse1);
         }
-      }, 1500); // Simulate network latency + generation time
+      }, 1500);
     });
   }
 
@@ -43,4 +42,79 @@ export async function sendChatMessage(request: ChatRequest): Promise<ChatRespons
   }
   
   return response.json();
+}
+
+export async function streamChatMessage(
+  request: ChatRequest,
+  onChunk: (chunk: string) => void,
+  onSources: (sources: SourcePassage[]) => void,
+  onError: (error: Error) => void,
+  onComplete: () => void
+) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/chat/stream`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'text/event-stream',
+      },
+      body: JSON.stringify(request),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to connect: ${response.statusText}`);
+    }
+
+    if (!response.body) {
+      throw new Error('ReadableStream not supported in this browser.');
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n\n');
+      buffer = lines.pop() || '';
+
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const dataStr = line.slice(6);
+          try {
+            const data = JSON.parse(dataStr);
+            if (data.type === 'metadata') {
+              onSources(data.sources);
+            } else if (data.type === 'chunk') {
+              onChunk(data.content);
+            }
+          } catch (e) {
+            console.error('Error parsing SSE data:', e, dataStr);
+          }
+        }
+      }
+    }
+    
+    // Process any remaining buffer
+    if (buffer.startsWith('data: ')) {
+      const dataStr = buffer.slice(6);
+      try {
+         const data = JSON.parse(dataStr);
+         if (data.type === 'metadata') {
+             onSources(data.sources);
+         } else if (data.type === 'chunk') {
+             onChunk(data.content);
+         }
+      } catch (e) {
+         console.error('Error parsing SSE data in buffer:', e, dataStr);
+      }
+    }
+
+    onComplete();
+  } catch (err: any) {
+    onError(err);
+  }
 }

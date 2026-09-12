@@ -362,3 +362,45 @@ Answer:"""
             "source_count": len(sources),
             "collection_count": self.collection_count(),
         }
+
+    def generate_answer_stream(self, query: str, sources: list[RetrievedSource]):
+        if not sources:
+            yield "I do not have enough reliable KCC context to answer this question safely."
+            return
+
+        api_key = os.environ.get("GEMINI_API_KEY")
+        if not api_key:
+            raise RuntimeError("GEMINI_API_KEY environment variable is not set.")
+
+        client = genai.Client(api_key=api_key)
+        response_stream = client.models.generate_content_stream(
+            model=self.llm_model_name,
+            contents=self.build_prompt(query, sources),
+            config=types.GenerateContentConfig(system_instruction=SYSTEM_INSTRUCTION),
+        )
+        for chunk in response_stream:
+            if chunk.text:
+                yield chunk.text
+
+    def answer_query_stream(
+        self,
+        query: str,
+        top_k: int = DEFAULT_TOP_K,
+        fetch_k: int = DEFAULT_FETCH_K,
+        where: dict[str, Any] | None = None,
+    ):
+        sources = self.retrieve_sources(query, top_k=top_k, fetch_k=fetch_k, where=where)
+        # First yield the sources so the UI can show them immediately
+        yield {
+            "type": "metadata",
+            "sources": sources,
+            "source_count": len(sources),
+            "collection_count": self.collection_count(),
+        }
+        
+        # Then yield the streamed chunks
+        for chunk in self.generate_answer_stream(query, sources):
+            yield {
+                "type": "chunk",
+                "content": chunk,
+            }
