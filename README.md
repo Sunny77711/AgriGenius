@@ -21,8 +21,7 @@ Implemented:
 
 Planned / in progress:
 
-- Streamlit-based farmer UI.
-- Streamlit display of retrieved source/citation cards.
+- React/Vite-based modern product frontend.
 - Reranking and improved English-Hindi retrieval fusion.
 - Evaluation against non-RAG baselines and held-out agricultural QA benchmarks.
 - Voice input/output for low-literacy accessibility.
@@ -116,6 +115,22 @@ Run local retrieval evaluation:
 ```bash
 python evaluate_retrieval.py --top-k 5 --fetch-k 50
 ```
+
+## Running the Frontend
+
+The React frontend requires Node.js.
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The frontend will be available at `http://localhost:5173`. Currently, it uses a mock backend.
+When the backend is ready, it should implement the following endpoints and `USE_MOCK` should be set to `false` in `src/lib/api.ts`:
+
+- `GET /api/health`: Return system status.
+- `POST /api/chat`: Accept `ChatRequest` and return `ChatResponse` with grounded answer and `SourcePassage` list.
 
 ## Dataset Note
 

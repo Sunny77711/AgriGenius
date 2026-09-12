@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-50: #ecfdf5;
+  --color-primary-100: #d1fae5;
+  --color-primary-200: #a7f3d0;
+  --color-primary-300: #6ee7b7;
+  --color-primary-400: #34d399;
+  --color-primary-500: #10b981;
+  --color-primary-600: #059669;
+  --color-primary-700: #047857;
+  --color-primary-800: #065f46;
+  --color-primary-900: #064e3b;
+}
+
+@layer base {
+  body {
+    @apply text-slate-800 bg-slate-50 antialiased selection:bg-primary-200 selection:text-primary-900;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-white/70 backdrop-blur-md border border-white/40 shadow-sm;
+  }
+  .glass-card {
+    @apply bg-white/60 backdrop-blur-lg border border-white/50 shadow-md;
+  }
+  .glass-panel {
+    @apply bg-slate-50/60 backdrop-blur-md border-l border-white/40 shadow-[-4px_0_24px_rgba(0,0,0,0.02)];
+  }
+  .gradient-mesh {
+    background-color: #ecfdf5;
+    background-image: 
+      radial-gradient(at 40% 20%, hsla(158,100%,74%,1) 0px, transparent 50%),
+      radial-gradient(at 80% 0%, hsla(189,100%,56%,1) 0px, transparent 50%),
+      radial-gradient(at 0% 50%, hsla(355,100%,93%,1) 0px, transparent 50%),
+      radial-gradient(at 80% 50%, hsla(340,100%,76%,0.2) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, hsla(22,100%,77%,1) 0px, transparent 50%),
+      radial-gradient(at 80% 100%, hsla(242,100%,70%,0.2) 0px, transparent 50%),
+      radial-gradient(at 0% 0%, hsla(343,100%,76%,0.2) 0px, transparent 50%);
+  }
+}
