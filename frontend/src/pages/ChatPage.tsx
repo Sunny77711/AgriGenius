@@ -11,7 +11,7 @@ export function ChatPage() {
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className="flex flex-col h-screen bg-slate-50/50 overflow-hidden font-sans relative"
+      className="flex flex-col h-screen gradient-mesh overflow-hidden font-sans relative"
     >
       {/* Background decoration */}
       <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary-200/30 blur-[100px] pointer-events-none" />

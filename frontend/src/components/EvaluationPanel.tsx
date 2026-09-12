@@ -1,4 +1,5 @@
 import { BarChart3 } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export function EvaluationPanel() {
   return (
@@ -10,22 +11,32 @@ export function EvaluationPanel() {
       
       <div className="space-y-4">
         <div>
-          <div className="flex justify-between items-end mb-1">
-            <span className="text-xs text-slate-500">Crop Hit Rate @ 5</span>
-            <span className="text-sm font-medium text-slate-700">6/6 (100%)</span>
+          <div className="flex justify-between items-end mb-2">
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Crop Hit Rate @ 5</span>
+            <span className="text-xs font-bold text-slate-800 bg-white/60 px-2 py-0.5 rounded shadow-sm">6/6 (100%)</span>
           </div>
-          <div className="w-full bg-slate-100 rounded-full h-1.5">
-            <div className="bg-primary-500 h-1.5 rounded-full" style={{ width: '100%' }}></div>
+          <div className="w-full bg-slate-200/50 rounded-full h-2 shadow-inner overflow-hidden relative">
+            <motion.div 
+              initial={{ width: 0 }}
+              animate={{ width: '100%' }}
+              transition={{ duration: 1, delay: 0.5, type: 'spring' }}
+              className="bg-gradient-to-r from-primary-400 to-primary-600 h-2 rounded-full shadow-[0_0_10px_rgba(16,185,129,0.5)]" 
+            />
           </div>
         </div>
         
-        <div>
-          <div className="flex justify-between items-end mb-1">
-            <span className="text-xs text-slate-500">Category Hit Rate @ 5</span>
-            <span className="text-sm font-medium text-slate-700">6/6 (100%)</span>
+        <div className="group">
+          <div className="flex justify-between items-end mb-2">
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Category Hit Rate @ 5</span>
+            <span className="text-xs font-bold text-slate-800 bg-white/60 px-2 py-0.5 rounded shadow-sm">6/6 (100%)</span>
           </div>
-          <div className="w-full bg-slate-100 rounded-full h-1.5">
-            <div className="bg-primary-500 h-1.5 rounded-full" style={{ width: '100%' }}></div>
+          <div className="w-full bg-slate-200/50 rounded-full h-2 shadow-inner overflow-hidden relative">
+            <motion.div 
+              initial={{ width: 0 }}
+              animate={{ width: '100%' }}
+              transition={{ duration: 1, delay: 0.7, type: 'spring' }}
+              className="bg-gradient-to-r from-blue-400 to-blue-600 h-2 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.5)]" 
+            />
           </div>
         </div>
         

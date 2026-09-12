@@ -12,27 +12,34 @@ export function ChatMessage({ message }: ChatMessageProps) {
   
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className={`py-8 ${isUser ? 'bg-transparent' : 'glass-panel mx-4 rounded-2xl my-2'}`}
+      layout
+      initial={{ opacity: 0, scale: 0.96, y: 20 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ duration: 0.4, type: "spring", bounce: 0.2 }}
+      className={`py-4 px-4 flex w-full ${isUser ? 'justify-end' : 'justify-start'}`}
     >
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 flex gap-6">
+      <div className={`flex gap-4 max-w-4xl ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
         <div className="flex-shrink-0 mt-1">
           {isUser ? (
-            <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center">
-              <User className="w-5 h-5 text-slate-600" />
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center shadow-md shadow-primary-500/20">
+              <User className="w-4 h-4 text-white" />
             </div>
           ) : (
-            <div className="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" />
+            <div className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center shadow-sm">
+              <Sparkles className="w-4 h-4 text-primary-600" />
             </div>
           )}
         </div>
         
-        <div className="flex-1 space-y-4">
-          <div className="prose prose-slate max-w-none">
-            <p className="text-slate-800 leading-relaxed whitespace-pre-wrap">{message.content}</p>
+        <div className={`flex flex-col space-y-4 ${isUser ? 'items-end' : 'items-start'}`}>
+          <div className={`px-5 py-3.5 rounded-2xl shadow-sm max-w-2xl ${
+            isUser 
+              ? 'bg-gradient-to-br from-primary-500 to-primary-600 text-white rounded-tr-sm shadow-primary-500/20' 
+              : 'glass rounded-tl-sm'
+          }`}>
+            <p className={`leading-relaxed whitespace-pre-wrap ${isUser ? 'text-white' : 'text-slate-800'}`}>
+              {message.content}
+            </p>
           </div>
           
           {message.responseDetails && (
