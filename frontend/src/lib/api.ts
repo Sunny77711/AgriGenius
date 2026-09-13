@@ -78,38 +78,47 @@ export async function streamChatMessage(
       if (done) break;
 
       buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n\n');
-      buffer = lines.pop() || '';
+      const parts = buffer.split(/\r?\n\r?\n/);
+      buffer = parts.pop() || '';
 
-      for (const line of lines) {
-        if (line.startsWith('data: ')) {
-          const dataStr = line.slice(6);
-          try {
-            const data = JSON.parse(dataStr);
-            if (data.type === 'metadata') {
-              onSources(data.sources);
-            } else if (data.type === 'chunk') {
-              onChunk(data.content);
+      for (const part of parts) {
+        if (!part.trim()) continue;
+        const lines = part.split(/\r?\n/);
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const dataStr = line.slice(6);
+            try {
+              const data = JSON.parse(dataStr);
+              if (data.type === 'metadata') {
+                onSources(data.sources);
+              } else if (data.type === 'chunk') {
+                onChunk(data.content);
+              }
+            } catch (e) {
+              console.error('Error parsing SSE data:', e, dataStr);
             }
-          } catch (e) {
-            console.error('Error parsing SSE data:', e, dataStr);
           }
         }
       }
     }
     
     // Process any remaining buffer
-    if (buffer.startsWith('data: ')) {
-      const dataStr = buffer.slice(6);
-      try {
-         const data = JSON.parse(dataStr);
-         if (data.type === 'metadata') {
-             onSources(data.sources);
-         } else if (data.type === 'chunk') {
-             onChunk(data.content);
-         }
-      } catch (e) {
-         console.error('Error parsing SSE data in buffer:', e, dataStr);
+    if (buffer.trim()) {
+      const lines = buffer.split(/\r?\n/);
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const dataStr = line.slice(6);
+          try {
+             const data = JSON.parse(dataStr);
+             if (data.type === 'metadata') {
+                 onSources(data.sources);
+             } else if (data.type === 'chunk') {
+                 onChunk(data.content);
+             }
+          } catch (e) {
+             console.error('Error parsing SSE data in buffer:', e, dataStr);
+          }
+        }
       }
     }
 
