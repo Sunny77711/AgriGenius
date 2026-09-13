@@ -20,12 +20,12 @@ export function ChatMessage({ message }: ChatMessageProps) {
       <div className={`flex gap-4 max-w-2xl ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
         <div className="flex-shrink-0 mt-1">
           {isUser ? (
-            <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center shadow-sm">
+            <div className="w-8 h-8 rounded-full bg-primary-700 flex items-center justify-center shadow-sm">
               <User className="w-4 h-4 text-white" />
             </div>
           ) : (
-            <div className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center shadow-sm">
-              <Sparkles className="w-4 h-4 text-primary-600" />
+            <div className="w-8 h-8 rounded-full bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 flex items-center justify-center shadow-sm">
+              <Sparkles className="w-4 h-4 text-primary-600 dark:text-primary-500" />
             </div>
           )}
         </div>
@@ -33,10 +33,10 @@ export function ChatMessage({ message }: ChatMessageProps) {
         <div className={`flex flex-col space-y-4 ${isUser ? 'items-end' : 'items-start'}`}>
           <div className={`px-5 py-3.5 rounded-2xl shadow-sm ${
             isUser 
-              ? 'bg-slate-800 text-white rounded-tr-sm' 
-              : 'bg-slate-50 border border-slate-100 rounded-tl-sm'
+              ? 'bg-primary-600 text-white rounded-tr-sm' 
+              : 'bg-slate-50 dark:bg-neutral-900 border border-slate-100 dark:border-neutral-800 rounded-tl-sm'
           }`}>
-            <p className={`leading-relaxed whitespace-pre-wrap ${isUser ? 'text-white' : 'text-slate-800'}`}>
+            <p className={`leading-relaxed whitespace-pre-wrap ${isUser ? 'text-white' : 'text-slate-800 dark:text-neutral-100'}`}>
               {message.content}
             </p>
           </div>

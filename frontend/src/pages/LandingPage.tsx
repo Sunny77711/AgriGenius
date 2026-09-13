@@ -1,14 +1,23 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Leaf, ArrowRight, ShieldCheck, Database, Zap } from 'lucide-react';
+import { ThemeToggle } from '../components/ThemeToggle';
 
 export function LandingPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen gradient-mesh flex flex-col relative overflow-hidden">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
+      className="min-h-screen flex flex-col relative overflow-hidden text-slate-900 dark:text-white dark:bg-black"
+    >
+      {/* Light Mode Mesh Background */}
+      <div className="absolute inset-0 z-0 pointer-events-none gradient-mesh dark:opacity-0"></div>
       {/* Navbar */}
-      <nav className="glass sticky top-0 z-50">
+      <nav className="glass dark:bg-black/70 dark:border-neutral-800 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             <motion.div 
@@ -19,10 +28,13 @@ export function LandingPage() {
               <div className="bg-gradient-to-br from-primary-400 to-primary-600 p-2.5 rounded-xl shadow-lg shadow-primary-500/30">
                 <Leaf className="w-6 h-6 text-white" />
               </div>
-              <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700 tracking-tight">
+              <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 tracking-tight">
                 AgriGenius
               </span>
             </motion.div>
+            <div className="flex items-center space-x-4">
+              <ThemeToggle />
+            </div>
           </div>
         </div>
       </nav>
@@ -35,7 +47,7 @@ export function LandingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold bg-white/80 text-primary-700 border border-primary-200/50 shadow-sm mb-8 backdrop-blur-sm">
+            <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold bg-white/80 dark:bg-neutral-900/80 text-primary-700 dark:text-primary-400 border border-primary-200/50 dark:border-primary-900/50 shadow-sm mb-8 backdrop-blur-sm">
               <span className="flex h-2 w-2 relative mr-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-primary-500"></span>
@@ -48,10 +60,10 @@ export function LandingPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-5xl md:text-7xl font-extrabold text-slate-900 tracking-tight mb-8 leading-tight"
+            className="text-5xl md:text-7xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-8 leading-tight"
           >
             Your Expert <br/>
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-emerald-400">
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-emerald-400 dark:from-primary-400 dark:to-emerald-300">
               Farming Assistant
             </span>
           </motion.h1>
@@ -60,7 +72,7 @@ export function LandingPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-lg md:text-xl text-slate-600 mb-12 max-w-2xl mx-auto leading-relaxed"
+            className="text-lg md:text-xl text-slate-600 dark:text-neutral-300 mb-12 max-w-2xl mx-auto leading-relaxed"
           >
             Get instant, evidence-based answers to your agricultural queries in English and Hindi. Grounded in 340,000+ authentic Kisan Call Centre advisory records.
           </motion.p>
@@ -70,13 +82,15 @@ export function LandingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
           >
-            <button 
-              onClick={() => navigate('/chat')}
-              className="group relative inline-flex items-center justify-center px-8 py-4 font-bold text-white transition-all duration-200 bg-primary-600 font-pj rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-600 hover:bg-primary-700 hover:shadow-xl hover:shadow-primary-500/30 hover:-translate-y-1"
+            <motion.button 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setTimeout(() => navigate('/chat'), 200)}
+              className="group relative inline-flex items-center justify-center px-8 py-4 font-bold text-white transition-all duration-200 bg-primary-600 font-pj rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-600 hover:bg-primary-700 hover:shadow-xl hover:shadow-primary-500/30"
             >
               Start Consulting Now
               <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-1 transition-transform" />
-            </button>
+            </motion.button>
           </motion.div>
         </div>
       </main>
@@ -104,7 +118,7 @@ export function LandingPage() {
           />
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -115,13 +129,13 @@ function FeatureCard({ icon, title, desc, delay }: { icon: React.ReactNode, titl
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay }}
       whileHover={{ y: -5 }}
-      className="glass-card p-6 rounded-2xl"
+      className="glass-card dark:bg-neutral-900/50 dark:border-neutral-800 p-6 rounded-2xl"
     >
-      <div className="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center mb-6">
+      <div className="w-12 h-12 bg-white dark:bg-neutral-900 rounded-xl shadow-sm flex items-center justify-center mb-6">
         {icon}
       </div>
-      <h3 className="text-xl font-bold text-slate-800 mb-3">{title}</h3>
-      <p className="text-slate-600 leading-relaxed">{desc}</p>
+      <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-3">{title}</h3>
+      <p className="text-slate-600 dark:text-neutral-400 leading-relaxed">{desc}</p>
     </motion.div>
   );
 }

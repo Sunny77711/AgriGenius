@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-primary-50: #ecfdf5;
   --color-primary-100: #d1fae5;
@@ -18,9 +20,21 @@
 
 @layer base {
   body {
-    @apply text-slate-800 bg-slate-50 antialiased selection:bg-primary-200 selection:text-primary-900 font-sans;
+    @apply text-slate-800 bg-slate-50 dark:bg-black dark:text-white antialiased selection:bg-primary-200 selection:text-primary-900 font-sans;
   }
   
+  /* Custom View Transitions for Magnifying Glass Effect */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+  }
+  ::view-transition-old(root) {
+    z-index: 1;
+  }
+  ::view-transition-new(root) {
+    z-index: 2;
+  }
   h1, h2, h3, h4, h5, h6 {
     @apply font-display;
   }
@@ -28,7 +42,7 @@
 
 @layer utilities {
   .glass {
-    @apply bg-white/70 backdrop-blur-md border border-white/40 shadow-sm;
+    @apply bg-white/70 dark:bg-black/70 backdrop-blur-md border border-white/40 dark:border-neutral-800 shadow-sm;
   }
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
@@ -36,5 +50,17 @@
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+  
+  .gradient-mesh {
+    background-color: #ecfdf5;
+    background-image: 
+      radial-gradient(at 40% 20%, hsla(158,100%,74%,1) 0px, transparent 50%),
+      radial-gradient(at 80% 0%, hsla(189,100%,56%,1) 0px, transparent 50%),
+      radial-gradient(at 0% 50%, hsla(355,100%,93%,1) 0px, transparent 50%),
+      radial-gradient(at 80% 50%, hsla(340,100%,76%,0.2) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, hsla(22,100%,77%,1) 0px, transparent 50%),
+      radial-gradient(at 80% 100%, hsla(242,100%,70%,0.2) 0px, transparent 50%),
+      radial-gradient(at 0% 0%, hsla(343,100%,76%,0.2) 0px, transparent 50%);
   }
 }
