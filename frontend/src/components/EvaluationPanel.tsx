@@ -38,7 +38,7 @@ export function EvaluationPanel() {
         </div>
       </div>
       <p className="text-xs text-slate-400 dark:text-neutral-500 mt-6 pt-4 border-t border-slate-100 dark:border-neutral-800 italic">
-        Retrieval hit rates are pending. Use LLM QA to compare both generators and calculate local answer-to-evidence and question-to-answer token coverage.
+        Retrieval hit rates are pending. Use LLM QA to compare three generators and review Gemini claim-level support estimates against KCC evidence.
       </p>
       <button type="button" onClick={() => navigate('/evaluation')} className="mt-4 rounded-xl bg-blue-700 hover:bg-blue-600 px-3 py-2 text-xs font-bold text-white transition-colors">
         Open LLM testing

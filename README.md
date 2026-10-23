@@ -15,7 +15,7 @@ The local Chroma collection records the embedding model, dimensions, normalizati
 
 ## Readiness
 
-The current state is a development prototype. Live multilingual retrieval, Qwen/GPT-OSS generation, local token-overlap metrics, and the BGE reranker still need end-to-end evaluation before a public or farmer-facing deployment. The application fails visibly when the backend is unavailable; it does not substitute sample agricultural answers.
+The current state is a development prototype. Live multilingual retrieval, three-generator comparison, Gemini claim-level judging, and the BGE reranker still need end-to-end evaluation before a public or farmer-facing deployment. The application fails visibly when the backend is unavailable; it does not substitute sample agricultural answers.
 
 ## Setup
 
@@ -27,7 +27,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Set `GROQ_API_KEY` for both answer generators. Optional model overrides are `AGRI_QWEN_MODEL` and `AGRI_GROQ_MODEL`. Evaluation scores are local token-overlap heuristics and need no judge API key. Both `.env` and `keys.env` are ignored by Git.
+Set `GROQ_API_KEY` for the Qwen and GPT-OSS generators and `GEMINI_API_KEY` for the claim-level evaluation judge. Optional model overrides are `AGRI_QWEN_MODEL`, `AGRI_GROQ_MODEL`, `AGRI_GROQ_LARGE_MODEL`, and `AGRI_EVAL_JUDGE_MODEL`. Both `.env` and `keys.env` are ignored by Git.
 
 Chat uses Qwen as its primary generator and retries with GPT-OSS if Qwen fails before returning an answer. The assistant identifies the model used. Both generators use Groq, so this fallback can recover from a model-specific error but not from a Groq outage or missing API key.
 
@@ -81,7 +81,7 @@ python evaluate_abstention.py --provider qwen
 
 The retrieval check uses a small demo set only; it is not a held-out agricultural QA benchmark. Run both checks with model access before deployment.
 
-The UI's **LLM QA** page runs Qwen and GPT-OSS on Groq against the same retrieved KCC passages and reports generation latency plus deterministic answer-to-evidence and question-to-answer token coverage. These are lexical heuristics, not semantic faithfulness, answer relevance, or hallucination scores. The source drawer can run LIME on demand to explain the BGE reranker's score for a selected source. See [docs/llm_evaluation_report.md](docs/llm_evaluation_report.md) for the evaluation protocol and current results status.
+The UI's **LLM QA** page compares Qwen 3.8 27B, GPT-OSS 20B, and GPT-OSS 120B on shared retrieved KCC passages. One Gemini 3.5 Flash-Lite judge call then returns claim-level source-support verdicts, semantic faithfulness and relevance estimates, and explanations. Reference-based correctness is available only when a reviewed reference answer is provided. The judge is not a factual oracle; see [docs/llm_evaluation_report.md](docs/llm_evaluation_report.md) for the protocol and limitations. The source drawer's LIME explanation describes the BGE reranker score, which is a separate XAI target.
 
 Run a batch comparison over the multilingual smoke set and save per-case output plus language/provider averages:
 

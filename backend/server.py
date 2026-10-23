@@ -54,13 +54,15 @@ except Exception as rag_err:
         @property
         def cross_encoder_name(self): return "none"
         @property
-        def llm_model_name(self): return "qwen/qwen3.8-27b"
+        def llm_model_name(self): return os.environ.get("AGRI_QWEN_MODEL", "qwen/qwen3.8-27b")
         @property
-        def qwen_model_name(self): return "qwen/qwen3.8-27b"
+        def qwen_model_name(self): return os.environ.get("AGRI_QWEN_MODEL", "qwen/qwen3.8-27b")
         @property
-        def groq_model_name(self): return "openai/gpt-oss-20b"
+        def groq_model_name(self): return os.environ.get("AGRI_GROQ_MODEL", "openai/gpt-oss-20b")
         @property
-        def llama_model_name(self): return "meta-llama/Llama-3.1-8B-Instruct"
+        def groq_large_model_name(self): return os.environ.get("AGRI_GROQ_LARGE_MODEL", "openai/gpt-oss-120b")
+        @property
+        def judge_model_name(self): return os.environ.get("AGRI_EVAL_JUDGE_MODEL", "gemini-3.5-flash-lite")
         def answer_query(self, *args, **kwargs):
             return {
                 "answer": "RAG knowledge base is initializing or offline.",
@@ -74,8 +76,25 @@ except Exception as rag_err:
             }
         def answer_query_stream(self, *args, **kwargs):
             yield {"type": "chunk", "content": "RAG knowledge base is initializing or offline."}
-        def compare_models(self, *args, **kwargs):
-            return {"gemini": {}, "llama": {}}
+        def compare_models(self, query="", *args, **kwargs):
+            providers = [
+                ("qwen", self.qwen_model_name),
+                ("groq", self.groq_model_name),
+                ("groq_120b", self.groq_large_model_name),
+            ]
+            return {
+                "query": query,
+                "reference_answer_provided": bool(kwargs.get("reference_answer")),
+                "models": [{"provider": provider, "model": model, "status": "error", "answer": None,
+                            "generation_latency_ms": 0, "error": "RAG retrieval pipeline is unavailable."}
+                           for provider, model in providers],
+                "sources": [],
+                "source_count": 0,
+                "evaluation": {"method": "gemini_claim_level_judge_v1", "judge_model": self.judge_model_name,
+                               "status": "skipped_no_context", "judge_latency_ms": None,
+                               "error": "RAG retrieval pipeline is unavailable.",
+                               "note": "No retrieved evidence is available to evaluate answers."},
+            }
         def retrieve_sources(self, *args, **kwargs):
             return []
         def explain_source_relevance(self, *args, **kwargs):
@@ -94,6 +113,7 @@ class ChatRequest(BaseModel):
 class CompareRequest(BaseModel):
     query: str = Field(min_length=2, max_length=2000)
     top_k: int = Field(default=5, ge=1, le=10)
+    reference_answer: Optional[str] = Field(default=None, max_length=4000)
 
 class ExplainRequest(BaseModel):
     query: str = Field(min_length=2, max_length=2000)
@@ -109,8 +129,13 @@ def health_check():
         "model": getattr(rag, "embed_model_name", "none"),
         "reranker": getattr(rag, "cross_encoder_name", "none"),
         "llm_model": qwen,
-        "llm_models": {"qwen": qwen, "groq": groq},
-        "evaluation_method": "deterministic_unicode_token_overlap_v1",
+        "llm_models": {
+            "qwen": qwen,
+            "groq": groq,
+            "groq_120b": rag.groq_large_model_name,
+        },
+        "evaluation_method": "gemini_claim_level_judge_v1",
+        "evaluation_judge": rag.judge_model_name,
     }
 
 @app.post("/api/chat")
@@ -152,7 +177,11 @@ def chat(request: ChatRequest):
 @app.post("/api/llm/compare")
 async def compare_llms(request: CompareRequest):
     """Compare both configured generators against the same retrieved context."""
-    return await rag.compare_models(request.query, top_k=request.top_k)
+    return await rag.compare_models(
+        request.query,
+        top_k=request.top_k,
+        reference_answer=request.reference_answer,
+    )
 
 @app.post("/api/explain")
 def explain_source(request: ExplainRequest):

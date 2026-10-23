@@ -55,11 +55,11 @@ export async function sendChatMessage(request: ChatRequest): Promise<ChatRespons
   };
 }
 
-export async function compareModels(query: string): Promise<ModelComparison> {
+export async function compareModels(query: string, referenceAnswer?: string): Promise<ModelComparison> {
   const response = await fetch(`${API_BASE_URL}/api/llm/compare`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query, top_k: 5 }),
+    body: JSON.stringify({ query, top_k: 5, reference_answer: referenceAnswer?.trim() || undefined }),
   });
   if (!response.ok) throw await responseError(response);
   return await response.json() as ModelComparison;

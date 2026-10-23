@@ -10,3 +10,4 @@ uvicorn
 sse-starlette
 lime>=0.2.0.1
 groq>=1,<2
+google-genai>=2,<3

@@ -54,9 +54,15 @@ export function StatusPanel() {
             </span>
           </div>
           <div className="flex justify-between items-center gap-2">
-            <span className="text-slate-500 dark:text-neutral-400">Evaluation scoring</span>
-            <span className="font-medium text-slate-700 dark:text-neutral-200 text-right max-w-[170px] truncate" title={health?.evaluation_method}>
-              {health?.evaluation_method || 'Local token overlap'}
+            <span className="text-slate-500 dark:text-neutral-400">Comparison model</span>
+            <span className="font-medium text-slate-700 dark:text-neutral-200 text-right max-w-[170px] truncate" title={health?.llm_models?.groq_120b}>
+              {health?.llm_models?.groq_120b || 'Unavailable'}
+            </span>
+          </div>
+          <div className="flex justify-between items-center gap-2">
+            <span className="text-slate-500 dark:text-neutral-400">Evaluation judge</span>
+            <span className="font-medium text-slate-700 dark:text-neutral-200 text-right max-w-[170px] truncate" title={health?.evaluation_judge}>
+              {health?.evaluation_judge || 'Unavailable'}
             </span>
           </div>
         </div>

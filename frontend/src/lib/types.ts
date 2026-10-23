@@ -39,17 +39,28 @@ export type ChatResponse = {
 export type GenerationInfo = NonNullable<ChatResponse["generation"]>;
 
 export type ModelComparisonResult = {
-  provider: 'qwen' | 'groq';
+  provider: 'qwen' | 'groq' | 'groq_120b';
   model: string;
   status: 'ok' | 'error';
   answer: string | null;
   generation_latency_ms: number;
   answer_characters?: number;
   error?: string;
+  claim_reviews?: Array<{
+    claim: string;
+    verdict: 'supported' | 'contradicted' | 'not_found';
+    source_ranks: number[];
+    rationale: string;
+  }>;
   metrics?: {
     evidence_token_coverage: number;
     question_token_coverage: number;
     unmatched_token_share_proxy: number;
+    semantic_faithfulness: number | null;
+    answer_relevance: number | null;
+    factual_correctness: number | null;
+    unsupported_claim_rate: number | null;
+    contradicted_claim_rate: number | null;
   };
 };
 
@@ -58,9 +69,13 @@ export type ModelComparison = {
   models: ModelComparisonResult[];
   sources: SourcePassage[];
   source_count: number;
+  reference_answer_provided: boolean;
   evaluation: {
     method: string;
+    judge_model: string;
     status: string;
+    judge_latency_ms: number | null;
+    error: string | null;
     note: string;
   };
 };
@@ -83,8 +98,9 @@ export type HealthResponse = {
   model?: string;
   reranker?: string;
   llm_model?: string;
-  llm_models?: { qwen?: string; groq?: string };
+  llm_models?: { qwen?: string; groq?: string; groq_120b?: string };
   evaluation_method?: string;
+  evaluation_judge?: string;
 };
 
 export type Message = {

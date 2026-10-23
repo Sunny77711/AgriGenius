@@ -1,4 +1,4 @@
-"""Compare both configured generators with local lexical metrics on reviewed queries."""
+"""Compare configured generators and score claim support with a Gemini judge."""
 
 import argparse
 import asyncio
@@ -40,8 +40,18 @@ def summarize(results: list[dict]) -> dict:
                 sum(row["metrics"]["unmatched_token_share_proxy"] for row in scored) / len(scored)
                 if scored else None
             ),
+            "mean_semantic_faithfulness_estimate": mean_metric(scored, "semantic_faithfulness"),
+            "mean_answer_relevance_estimate": mean_metric(scored, "answer_relevance"),
+            "mean_reference_correctness_estimate": mean_metric(scored, "factual_correctness"),
+            "mean_unverified_claim_rate_estimate": mean_metric(scored, "unsupported_claim_rate"),
         }
     return summary
+
+
+def mean_metric(rows: list[dict], metric: str) -> float | None:
+    values = [row["metrics"].get(metric) for row in rows]
+    values = [value for value in values if value is not None]
+    return sum(values) / len(values) if values else None
 
 
 async def main() -> int:
@@ -63,7 +73,11 @@ async def main() -> int:
         if not query:
             print(f"Skipping case {index}: missing query")
             continue
-        comparison = await rag.compare_models(query, top_k=args.top_k)
+        comparison = await rag.compare_models(
+            query,
+            top_k=args.top_k,
+            reference_answer=case.get("reference_answer"),
+        )
         results.append({
             "case_id": case.get("id", index),
             "language": case.get("language", "Unspecified"),
@@ -76,19 +90,21 @@ async def main() -> int:
             f"{model['provider']}={model['status']}"
             for model in comparison["models"]
         )
-        print(f"[{index}/{len(cases)}] {case.get('language', 'Unspecified')}: {statuses}; local_scores={comparison['evaluation']['status']}")
+        print(f"[{index}/{len(cases)}] {case.get('language', 'Unspecified')}: {statuses}; judge={comparison['evaluation']['status']}")
 
     output = {
         "query_file": str(Path(args.query_file)),
-        "model_ids": {"qwen": rag.qwen_model_name, "groq": rag.groq_model_name},
-        "evaluation_method": "deterministic_unicode_token_overlap_v1",
+        "model_ids": {"qwen": rag.qwen_model_name, "groq": rag.groq_model_name, "groq_120b": rag.groq_large_model_name},
+        "evaluation_method": "gemini_claim_level_judge_v1",
+        "judge_model": rag.judge_model_name,
         "results": results,
         "summary_by_language_and_provider": summarize(results),
         "limitations": [
             "This set is exploratory unless its questions and reference answers have been reviewed by agricultural experts.",
-            "Evidence and question scores are exact-token overlap heuristics; they do not detect semantic support, answer correctness, or hallucinations.",
+            "Semantic faithfulness, relevance, and claim verdicts are Gemini judge estimates and are not ground truth.",
             "Token overlap is sensitive to wording, inflection, spelling, and language; human review is needed, especially for Hindi and Telugu.",
-            "Unmatched-token share is 1 - evidence token coverage, not an unsupported-claim or hallucination classifier.",
+            "Reference-based correctness is scored only when a reviewed reference answer is present; it does not establish objective truth.",
+            "Unverified-claim rate is the share of claims judged unsupported or contradicted by retrieved evidence; it is not a definitive hallucination detector.",
         ],
     }
     with open(args.output, "w", encoding="utf-8") as file:

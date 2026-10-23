@@ -1,45 +1,53 @@
 # LLM Evaluation Protocol and Current Status
 
-## Purpose and setup
+## Models and request flow
 
-The `/evaluation` page compares the configured Qwen and GPT-OSS generators using the same retrieved Kisan Call Centre passages. It records provider status, answer text, end-to-end generation latency, and answer length. After each successful generation, the backend computes deterministic local lexical metrics. Scoring is immediate and does not call a judge model or require a judge API key.
+The `/evaluation` page retrieves Kisan Call Centre passages once, then runs three generators concurrently against that same question and evidence:
 
-The metrics are deliberately named token coverage rather than faithfulness or relevance. They are inexpensive indicators for inspecting outputs and are not validated measures of answer quality.
-
-## Local metrics and formulas
-
-The scorer case-folds Unicode letter/number tokens, removes source citation markers such as `[Source 1]`, and excludes a small list of English, Hindi, and Telugu stopwords.
-
-| Metric | Calculation | Interpretation |
+| Generator | Provider | Default model ID |
 |---|---|---|
-| Evidence token coverage | For each answer sentence with content tokens, count unique sentence tokens also present among all retrieved passage tokens, divided by the sentence's unique content tokens. Average across answer sentences. | Literal lexical overlap with retrieved evidence. Higher means more answer wording also occurs in the evidence. |
-| Question token coverage | Unique question content tokens also present in the answer, divided by all unique question content tokens. | Literal overlap between the question and answer. It does not determine whether the answer addresses the question correctly. |
-| Unmatched answer-token share (proxy) | `1 - evidence token coverage`. | Complementary lexical indicator only. It is not an unsupported-claim rate or hallucination detector. |
+| Qwen 3.8 27B | Groq | `qwen/qwen3.8-27b` |
+| GPT-OSS 20B | Groq | `openai/gpt-oss-20b` |
+| GPT-OSS 120B | Groq | `openai/gpt-oss-120b` |
 
-If there are no answer sentences with content tokens, evidence token coverage is zero. If the question contains no content tokens after filtering, question token coverage is zero. Scores are between zero and one in the API and shown as decimals in the comparison cards.
+After generation, one Gemini 3.5 Flash-Lite request reviews all successful answers together. This is a custom claim-level evaluator; RAGAS is not used. The scorer is configurable with `AGRI_EVAL_JUDGE_MODEL` and requires `GEMINI_API_KEY`. A failed or timed-out judge leaves semantic fields pending while preserving model answers and local token-overlap diagnostics.
 
-## Limitations
+## Judge measures
 
-Exact token overlap is sensitive to paraphrase, inflection, spelling, transliteration, and language. It can penalize a correct paraphrase or reward repeated and generic words. Sentence-level averaging gives each answer sentence equal weight. Context tokens are combined across all retrieved passages, so a token match does not show which passage supports a claim. Neither metric checks negation, quantities, causal reasoning, factual accuracy, or agronomic safety.
+The judge is instructed to split material factual statements into claims and label each `supported`, `contradicted`, or `not_found` against the supplied retrieved passages. Each review includes a short rationale and source ranks. API score values are between zero and one.
 
-Use these scores as transparent lexical diagnostics only. Review answers claim-by-claim against the cited passages, and use qualified agricultural review for safety-sensitive advice. For a quality benchmark, use reviewed reference answers and a documented human evaluation protocol in addition to these indicators.
+| Measure | Calculation / basis | Interpretation |
+|---|---|---|
+| Semantic faithfulness estimate | Supported claims divided by all reviewed claims. | Gemini's estimate of what fraction of claims are entailed by retrieved evidence. It can be wrong and is not a proof of truth. |
+| Answer relevance estimate | Gemini assigns a 0–1 score for how well the answer addresses the question. | A model-judge estimate, not a human relevance rating or correctness score. |
+| Unverified claim rate | Claims labeled `not_found` or `contradicted`, divided by all reviewed claims. | Source-grounding warning. It is not a definitive hallucination detector. |
+| Contradicted claim rate | Claims labeled `contradicted`, divided by all reviewed claims. | Highlights conflict with retrieved evidence; the judge may miss contradictions. |
+| Reference-based correctness estimate | Gemini compares the answer with an optional reviewed reference answer. | Available only when such a reference is supplied. It measures judged alignment with that reference, not objective truth. |
+
+The optional reference-answer field is intended for reviewed evaluation cases. For the batch runner, provide `reference_answer` in each query JSON record. Live cases without one report reference-based correctness as not scored.
+
+## Local diagnostics and explainability
+
+Evidence-token and question-token coverage remain as secondary lexical diagnostics. They use deterministic Unicode token overlap and should not be called faithfulness or relevance. The claim-level rationale and cited source ranks explain the judge's recorded decision; they do not explain the generators' internal reasoning. The existing LIME integration explains how question tokens affect the BGE reranker's relevance score for a selected source. These are separate explanation targets.
+
+## Limitations and safety
+
+The judge is another model and can miss unsupported details, mishandle negation or quantities, and show language or model bias. “Not found” means the supplied retrieved passages did not establish a claim; it does not necessarily mean the claim is false. The reference-based correctness figure is itself judge-estimated. Use expert-reviewed references and qualified agricultural review for safety-sensitive advice. Do not treat these automated metrics as deployment certification.
 
 ## Batch evaluation
-
-For reviewed multilingual cases, run:
 
 ```bash
 python evaluate_llms.py --query-file <reviewed-cases.json> --output llm_evaluation_results.json
 ```
 
-Each output case includes model IDs, language, retrieved evidence, generation outcomes, local scores, and latency. The summary groups successful scores by language and provider. A run requires the configured Groq generation access and the project's local retrieval models/index; local scoring itself requires no external service. Record the date, model IDs, language, reviewed case set, provider failures, latency, and metric means when publishing results. Do not interpret means as semantic faithfulness or correctness.
+Each case stores model IDs, generated answers, retrieved evidence, generation timings, local diagnostics, judge verdicts, and claim rationales. The summary groups generation and score averages by language and provider. Record the run date, model IDs, reviewed case set, judge status, provider errors, and human-review outcomes before citing scores.
 
 ## Current results status
 
-| Language / check | Generator comparison | Local token metrics | Status |
+| Language / check | Generators | Judge metrics | Status |
 |---|---|---|---|
-| Hindi | Qwen 3.8 27B vs Groq GPT-OSS 20B | Evidence and question token coverage | Pending reviewed batch run |
-| Telugu | Qwen 3.8 27B vs Groq GPT-OSS 20B | Evidence and question token coverage | Pending reviewed batch run |
-| English | Qwen 3.8 27B vs Groq GPT-OSS 20B | Evidence and question token coverage | Pending reviewed batch run |
+| Hindi | Qwen 3.8 27B, GPT-OSS 20B, GPT-OSS 120B | Claim support, relevance; correctness only with reviewed references | Pending reviewed batch run |
+| Telugu | Qwen 3.8 27B, GPT-OSS 20B, GPT-OSS 120B | Claim support, relevance; correctness only with reviewed references | Pending reviewed batch run |
+| English | Qwen 3.8 27B, GPT-OSS 20B, GPT-OSS 120B | Claim support, relevance; correctness only with reviewed references | Pending reviewed batch run |
 
-No aggregate generator-quality results are claimed here until the reviewed multilingual run is saved and inspected. LIME source explanations concern the BGE reranker's local relevance score for a selected passage; they do not explain or validate the generated answer. This report does not certify farmer-facing readiness.
+No aggregate model-quality result is claimed until a reviewed multilingual run is completed and inspected. This report does not certify farmer-facing readiness.

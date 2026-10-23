@@ -22,11 +22,11 @@ AgriGenius is a local multilingual RAG development prototype. The checked-in bac
 - Vector store: ChromaDB, collection `kcc_agri_advisor`, cosine distance.
 - Reranker: `BAAI/bge-reranker-v2-m3`.
 - Generation: Groq-hosted Qwen (`qwen/qwen3.8-27b` by default) and Groq GPT-OSS (`openai/gpt-oss-20b`); both can be run against the same evidence through the LLM QA page.
-- Evaluation scores: deterministic local Unicode token coverage for answer-to-evidence and question-to-answer overlap; no judge model is called.
-- Chat generation: Qwen via Groq is primary; GPT-OSS via Groq is retried once on a pre-answer failure, and the selected model is reported with the response.
+- Evaluation: three concurrent Groq generators followed by one custom Gemini claim-level judge call; no RAGAS dependency. Semantic scores and per-claim source rationales are judge estimates.
+- Chat generation: Qwen via Groq is primary; GPT-OSS 20B via Groq is retried once on a pre-answer failure, and the selected model is reported with the response. GPT-OSS 120B is included in the comparison/evaluation page.
 - Explainability: on-demand LIME perturbation explanation for the BGE cross-encoder relevance score of a selected source.
 - Service: FastAPI with `/api/health`, `/api/chat`, `/api/chat/stream`, `/api/llm/compare`, and `/api/explain`.
-- UI: React 19, TypeScript, Vite, with SSE streaming, source cards, an LLM QA view, live per-run generation latency, and local token-overlap indicators.
+- UI: React 19, TypeScript, Vite, with SSE streaming, source cards, a three-generator LLM QA view, Gemini judge estimates, claim-level evidence explanations, and LIME source explanations.
 
 ## Readiness Checks Still Required
 
@@ -43,8 +43,8 @@ AgriGenius is a local multilingual RAG development prototype. The checked-in bac
 
 The authoritative local working count is **493,213**, because the current final CSV, local Chroma collection, sampled indexed records, and the index-build notebook agree. The previous repository docs' 347,944 count and the separate engineering summary's 508,072 cleaned-corpus count describe earlier or different artifacts and are not the active local count.
 
-Earlier checks on 2026-10-22 could not complete multilingual retrieval because Hugging Face DNS was unavailable. A Gemini-generation smoke run later failed during RAGAS initialization because Instructor 1.3.2 did not expose `from_genai`; a hosted Llama attempt also hit exhausted Hugging Face credits. These are historical and superseded: scoring is now local and model-free. Current generation uses Groq-hosted Qwen and GPT-OSS; multilingual results still need to be collected and reviewed.
+Earlier checks on 2026-10-22 could not complete multilingual retrieval because Hugging Face DNS was unavailable. A Gemini-generation smoke run later failed during RAGAS initialization because Instructor 1.3.2 did not expose `from_genai`; a hosted Llama attempt also hit exhausted Hugging Face credits. The current judge uses the direct Google GenAI SDK without RAGAS or Instructor. Multilingual results still need to be collected and reviewed.
 
 ## Model QA and Explainability
 
-The LLM QA screen runs both generators on the same retrieved passages, records generation latency and answer length, and immediately computes evidence-token coverage plus question-token coverage locally. Unmatched answer-token share is `1 - evidence-token coverage`; it is only a lexical proxy, not a hallucination classifier. No scoring-model credentials or dependency are needed. Source-card LIME perturbations explain the local BGE reranker score only; they do not establish answer truth or agronomic safety. Multilingual generator results still require a credentialed run and human review.
+The LLM QA screen runs Qwen 3.8 27B, GPT-OSS 20B, and GPT-OSS 120B against the same retrieved passages, then asks Gemini 3.5 Flash-Lite to evaluate all successful answers in one call. Claim verdicts and semantic-faithfulness/relevance scores are estimates. Reference-based correctness is only shown when a reviewed reference answer is supplied; no automated value proves agronomic safety. Source-card LIME explains the BGE reranker score. A credentialed multilingual run and human review remain outstanding.
